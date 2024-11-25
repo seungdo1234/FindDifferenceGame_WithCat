@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 
-public enum E_PoolObjectType { Default = -1, Success, Fail, SuccessEffect, CatchMatchedEffect, CatchStartEffect, CurrencyEffect  }
+public enum E_PoolObjectType { Default = -1, Success, Fail, SuccessEffect, CatchMatchedEffect, CatchStartEffect, CurrencyEffect }
 
 public class PoolManager : Singleton<PoolManager>
 {
@@ -37,7 +37,7 @@ public class PoolManager : Singleton<PoolManager>
 
     private async UniTask InitPoolDataAsync()
     {
-        
+
         foreach (var pool in pools)
         {
             int typeKey = (int)pool.type;
@@ -63,7 +63,7 @@ public class PoolManager : Singleton<PoolManager>
     public T SpawnFromPool<T>(E_PoolObjectType type) where T : PoolObject
     {
         int typeKey = (int)type;
-        if (!poolDictionary.TryGetValue(typeKey, out var objectQueue))
+        if (!poolDictionary.TryGetValue(typeKey, out Queue<PoolObject> objectQueue))
         {
             Debug.LogError($"Pool of type {type} doesn't exist.");
             return null;
@@ -84,7 +84,11 @@ public class PoolManager : Singleton<PoolManager>
             poolObject = objectQueue.Dequeue() as T;
         }
 
-        poolObject.gameObject.SetActive(true);
+        if (poolObject != null)
+            poolObject.gameObject.SetActive(true);
+        else
+            Debug.LogError($"{type} is Null !");
+
         return poolObject;
     }
 
@@ -94,5 +98,5 @@ public class PoolManager : Singleton<PoolManager>
         obj.gameObject.SetActive(false);
         poolDictionary[typeKey].Enqueue(obj);
     }
-    
+
 }
